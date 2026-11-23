@@ -1,3 +1,4 @@
+# ito naman para hindi makita yung password sa git
 node_modules/
 .env
 spendlog.db

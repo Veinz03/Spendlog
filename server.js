@@ -9,13 +9,13 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Connect to Neon PostgreSQL
+// To connect sya sa Neon PostgreSQL
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
-// Automatically create the expenses table if it doesn't exist
+// Automatically naga create ng expenses table if it doesn't exist
 async function initDB() {
   try {
     await pool.query(`
@@ -34,7 +34,7 @@ async function initDB() {
 }
 initDB();
 
-// Helper: Build inclusive date-range WHERE clause ($1, $2)
+// ito, ewan ko haha Helper: Build inclusive date-range WHERE clause ($1, $2)
 function buildDateFilter(start, end) {
   const conditions = [];
   const params = [];
@@ -52,7 +52,7 @@ function buildDateFilter(start, end) {
   return { whereClause, params };
 }
 
-// POST /api/expenses - Record a new expense
+// Dito yung POST /api/expenses to record a new expense
 app.post('/api/expenses', async (req, res) => {
   const { date, description, category, amount } = req.body;
 
@@ -73,20 +73,20 @@ app.post('/api/expenses', async (req, res) => {
   }
 });
 
-// GET /api/dashboard - Fetch expense table + all 3 reports
+// Dito naman GET /api/dashboard para ma fetch yung expense table + all 3 reports
 app.get('/api/dashboard', async (req, res) => {
   try {
     const { start, end } = req.query;
     const { whereClause, params } = buildDateFilter(start, end);
 
-    // 1. All recorded expenses
+    // 1. all recorded expenses
     const expensesRes = await pool.query(
       `SELECT id, expense_date AS date, description, category, amount::float 
        FROM expenses 
        ORDER BY expense_date DESC, id DESC`
     );
 
-    // 2. Category Report
+    // 2. category report
     const categoryRes = await pool.query(
       `SELECT category, ROUND(SUM(amount), 2)::float AS total 
        FROM expenses 
@@ -96,7 +96,7 @@ app.get('/api/dashboard', async (req, res) => {
       params
     );
 
-    // 3. Daily Report
+    // 3. daily report
     const dailyRes = await pool.query(
       `SELECT expense_date AS date, ROUND(SUM(amount), 2)::float AS total 
        FROM expenses 
@@ -106,7 +106,7 @@ app.get('/api/dashboard', async (req, res) => {
       params
     );
 
-    // 4. Monthly Report
+    // 4. monthly report
     const monthlyRes = await pool.query(
       `SELECT SUBSTRING(expense_date, 1, 7) AS month, ROUND(SUM(amount), 2)::float AS total 
        FROM expenses 

@@ -1,9 +1,9 @@
 :root {
-  --blue-dark: #0f294a;
+  --blue-dark: #071442;
   --blue-primary: #1d4ed8;
   --blue-hover: #1e40af;
   --yellow-accent: #facc15;
-  --bg: #f4f6f9;
+  --bg: #e8edf5;
   --surface: #ffffff;
   --border: #d1d5db;
   --text: #111827;
@@ -297,4 +297,16 @@ tbody tr:hover {
   .form-grid {
     grid-template-columns: 1fr;
   }
+}
+
+footer {
+  background-color: var(--blue-dark);
+  color: #ffffff;
+  padding: 1rem 0;
+  font-size: small;
+  text-align: center;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+ 
 }

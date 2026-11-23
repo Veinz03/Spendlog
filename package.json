@@ -13,6 +13,6 @@
     "pg": "^8.23.1"
   },
   "allowScripts": {
-    "sqlite3@5.1.7": true
+    
   }
 }
