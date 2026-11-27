@@ -10,10 +10,29 @@
   --muted: #4b5563;
 }
 
+main.container {
+  flex: 1;
+  width: 100%;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+}
+
+.description-cell {
+  max-width: 24rem;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+.footer {
+  margin-top: 1rem;
 }
 
 body {
@@ -21,7 +40,9 @@ body {
   background-color: var(--bg);
   color: var(--text);
   line-height: 1.5;
-  padding-bottom: 3rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .container {
@@ -103,7 +124,11 @@ h3 {
   display: grid;
   grid-template-columns: 160px 1fr 180px 150px auto;
   gap: 0.75rem;
-  align-items: end;
+  align-items: start;
+}
+
+.field-btn {
+  padding-top: 1.45rem;
 }
 
 .filter-header {
@@ -127,6 +152,12 @@ h3 {
   gap: 0.25rem;
 }
 
+.field-error {
+  min-height: 1.1em;
+  color: #b91c1c;
+  font-size: 0.75rem;
+}
+
 label {
   font-size: 0.8rem;
   font-weight: 600;
@@ -139,7 +170,9 @@ label {
 }
 
 /* Input Hover & Focus Animation */
-input {
+input,
+textarea {
+  width: 100%;
   font-family: inherit;
   padding: 0.5rem 0.65rem;
   border: 1px solid var(--border);
@@ -150,13 +183,20 @@ input {
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-input:hover {
+textarea {
+  resize: vertical;
+  min-height: 2.6rem;
+}
+
+input:hover,
+textarea:hover {
   border-color: var(--blue-primary);
   transform: translateY(-1px);
   box-shadow: 0 3px 8px rgba(29, 78, 216, 0.08);
 }
 
-input:focus {
+input:focus,
+textarea:focus {
   outline: none;
   border-color: var(--blue-primary);
   box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.2);
@@ -226,7 +266,7 @@ button:active {
 
 .reports-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
 
@@ -234,14 +274,73 @@ button:active {
   overflow-x: auto;
 }
 
+.expenses-table {
+  min-width: 600px;
+}
+
+.expenses-table th,
+.expenses-table td {
+  border-bottom: 0;
+}
+
+.expenses-table th:not(:last-child),
+.expenses-table td:not(:last-child) {
+  border-right: 1px solid #DDE3EB;
+}
+
+.expenses-table th:last-child,
+.expenses-table td:last-child {
+  border-right: 0;
+}
+
+.expenses-table th:nth-child(1),
+.expenses-table td:nth-child(1) {
+  width: 18%;
+}
+
+.expenses-table th:nth-child(2),
+.expenses-table td:nth-child(2) {
+  width: 42%;
+}
+
+.expenses-table th:nth-child(3),
+.expenses-table td:nth-child(3) {
+  width: 22%;
+}
+
+.expenses-table th:nth-child(4),
+.expenses-table td:nth-child(4) {
+  width: 18%;
+}
+
+.expenses-table thead {
+  border-bottom: 1px solid #DDE3EB;
+}
+
+.expenses-table tbody tr {
+  border-bottom: 1px solid #DDE3EB;
+}
+
+.expenses-table tbody tr:last-child {
+  border-bottom: 0;
+}
+
+.expenses-table tbody td {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
   font-size: 0.9rem;
+  table-layout: fixed;
 }
 
 th, td {
   text-align: left;
+  vertical-align: top;
+  overflow-wrap: anywhere;
   padding: 0.55rem 0.65rem;
   border-bottom: 1px solid #e5e7eb;
 }
@@ -288,6 +387,9 @@ tbody tr:hover {
   .form-grid {
     grid-template-columns: 1fr 1fr;
   }
+  .field-btn {
+    padding-top: 0;
+  }
   .reports-grid {
     grid-template-columns: 1fr;
   }
@@ -305,8 +407,5 @@ footer {
   padding: 1rem 0;
   font-size: small;
   text-align: center;
-  position: fixed;
-  bottom: 0;
   width: 100%;
- 
 }

@@ -21,18 +21,21 @@
     <!-- Record Expense Form -->
     <section class="card">
       <h2>Record New Expense</h2>
-      <form id="expense-form" class="form-grid">
+      <form id="expense-form" class="form-grid" novalidate>
         <div class="field">
           <label for="date">Date</label>
-          <input type="date" id="date" required />
+          <input type="date" id="date" aria-describedby="date-error" aria-invalid="false" required />
+          <span class="field-error" id="date-error"></span>
         </div>
         <div class="field">
           <label for="description">Description</label>
-          <input type="text" id="description" placeholder="ex: Lunch at canteen" maxlength="100" required />
+          <textarea id="description" placeholder="ex: Lunch at canteen" maxlength="1000" rows="2" aria-describedby="description-error" aria-invalid="false" required></textarea>
+          <span class="field-error" id="description-error"></span>
         </div>
         <div class="field">
           <label for="category">Category</label>
-          <input type="text" id="category" list="category-suggestions" placeholder="ex: Food" maxlength="40" required />
+          <input type="text" id="category" list="category-suggestions" placeholder="ex: Food" maxlength="40" aria-describedby="category-error" aria-invalid="false" required />
+          <span class="field-error" id="category-error"></span>
           <datalist id="category-suggestions">
             <option value="Foods"></option>
             <option value="Transportation"></option>
@@ -43,7 +46,8 @@
         </div>
         <div class="field">
           <label for="amount">Amount (PHP)</label>
-          <input type="number" id="amount" step="0.01" min="0.01" placeholder="0.00" required />
+          <input type="number" id="amount" step="1" min="1" max="9999999999" placeholder="1" aria-describedby="amount-error" aria-invalid="false" required />
+          <span class="field-error" id="amount-error"></span>
         </div>
         <div class="field field-btn">
           <button type="submit" class="btn-primary">Add Expense</button>
@@ -72,6 +76,7 @@
           <button type="button" id="reset-filter-btn" class="btn-secondary">Reset</button>
         </div>
       </div>
+      <p id="filter-status" class="status-msg" aria-live="polite"></p>
     </section>
 
     <!-- yung 3 reports -->
@@ -129,7 +134,7 @@
     <section class="card">
       <h2>Recorded Expenses</h2>
       <div class="table-wrap">
-        <table>
+        <table class="expenses-table">
           <thead>
             <tr>
               <th>Date</th>
@@ -144,11 +149,12 @@
     </section>
   </main>
 
- <footer class="footer">
+  <footer class="footer">
     <div class="container">
       <p>&copy; 2026 SpendLog. All rights reserved.</p>
       <p>Moneda | Lauzon | Antones | Orubia | Magtoto </p>
     </div>
+  </footer>
 
   <script src="app.js"></script>
 </body>

@@ -15,14 +15,71 @@ const startDateInput = document.getElementById('start-date');
 const endDateInput = document.getElementById('end-date');
 const applyFilterBtn = document.getElementById('apply-filter-btn');
 const resetFilterBtn = document.getElementById('reset-filter-btn');
+const filterStatus = document.getElementById('filter-status');
+const expenseFields = {
+  date: document.getElementById('date-error'),
+  description: document.getElementById('description-error'),
+  category: document.getElementById('category-error'),
+  amount: document.getElementById('amount-error')
+};
 
-// Default date input to today's local date
-function setTodayDefault() {
+function localDateString() {
   const now = new Date();
   const yyyy = now.getFullYear();
   const mm = String(now.getMonth() + 1).padStart(2, '0');
   const dd = String(now.getDate()).padStart(2, '0');
-  dateInput.value = `${yyyy}-${mm}-${dd}`;
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function setTodayDefault() {
+  dateInput.min = localDateString();
+  dateInput.value = dateInput.min;
+}
+
+function updateDateRangeConstraints() {
+  endDateInput.min = startDateInput.value;
+  startDateInput.max = endDateInput.value;
+}
+
+function validateExpense() {
+  const amount = Number(amountInput.value);
+  const errors = {
+    date: !dateInput.value
+      ? 'Choose an expense date.'
+      : dateInput.value < dateInput.min
+        ? 'Date cannot be in the past.'
+        : '',
+    description: !descInput.value.trim()
+      ? 'Enter a description.'
+      : descInput.value.trim().length > 1000
+        ? 'Description must be 1,000 characters or fewer.'
+        : '',
+    category: !catInput.value.trim()
+      ? 'Enter a category.'
+      : catInput.value.trim().toLowerCase() === 'dropout'
+        ? 'Dropout is not an available category.'
+        : '',
+    amount: !amountInput.value
+      ? 'Enter an amount.'
+      : !Number.isInteger(amount) || amount < 1
+        ? 'Amount must be a whole number between 1 and 9,999,999,999.'
+        : amount > Number(amountInput.max)
+          ? 'Amount exceeds the maximum supported value.'
+          : ''
+  };
+
+  Object.keys(errors).forEach(key => {
+    expenseFields[key].textContent = errors[key];
+    document.getElementById(key).setAttribute('aria-invalid', String(Boolean(errors[key])));
+  });
+  return Object.values(errors).every(error => !error);
+}
+
+function clearExpenseErrors() {
+  Object.keys(expenseFields).forEach(key => {
+    expenseFields[key].textContent = '';
+    document.getElementById(key).setAttribute('aria-invalid', 'false');
+  });
 }
 
 function escapeHtml(str) {
@@ -44,6 +101,7 @@ async function loadDashboard() {
 
   const query = params.toString() ? `?${params.toString()}` : '';
   const res = await fetch(`/api/dashboard${query}`);
+  if (!res.ok) throw new Error('Failed to load dashboard data.');
   const data = await res.json();
 
   renderExpensesTable(data.expenses);
@@ -62,7 +120,7 @@ function renderExpensesTable(expenses) {
   tbody.innerHTML = expenses.map(item => `
     <tr>
       <td>${escapeHtml(item.date)}</td>
-      <td>${escapeHtml(item.description)}</td>
+      <td><span class="description-cell">${escapeHtml(item.description)}</span></td>
       <td>${escapeHtml(item.category)}</td>
       <td class="num">${currencyFormatter.format(item.amount)}</td>
     </tr>
@@ -117,12 +175,16 @@ function renderMonthlyReport(rows) {
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
   formStatus.textContent = '';
+  if (!validateExpense()) {
+    formStatus.textContent = 'Please correct the highlighted fields.';
+    return;
+  }
 
   const payload = {
     date: dateInput.value,
-    description: descInput.value,
-    category: catInput.value,
-    amount: parseFloat(amountInput.value)
+    description: descInput.value.trim(),
+    category: catInput.value.trim(),
+    amount: Number(amountInput.value)
   };
 
   try {
@@ -140,27 +202,63 @@ form.addEventListener('submit', async (e) => {
 
     descInput.value = '';
     amountInput.value = '';
+    catInput.value = '';
+    clearExpenseErrors();
     formStatus.textContent = 'Expense recorded.';
-    await loadDashboard();
+    try {
+      await loadDashboard();
+    } catch (err) {
+      formStatus.textContent = 'Expense recorded, but dashboard data could not be refreshed.';
+    }
   } catch (err) {
     formStatus.textContent = 'Network error while saving expense.';
   }
 });
 
-applyFilterBtn.addEventListener('click', () => {
-  if (startDateInput.value && endDateInput.value && startDateInput.value > endDateInput.value) {
-    alert('Start Date cannot be later than End Date.');
-    return;
+form.addEventListener('input', () => {
+  if (formStatus.textContent === 'Please correct the highlighted fields.') {
+    validateExpense();
+    if (Object.values(expenseFields).every(field => !field.textContent)) formStatus.textContent = '';
   }
-  loadDashboard();
 });
 
-resetFilterBtn.addEventListener('click', () => {
+startDateInput.addEventListener('input', () => {
+  updateDateRangeConstraints();
+  filterStatus.textContent = '';
+});
+endDateInput.addEventListener('input', () => {
+  updateDateRangeConstraints();
+  filterStatus.textContent = '';
+});
+
+applyFilterBtn.addEventListener('click', async () => {
+  filterStatus.textContent = '';
+  if (startDateInput.value && endDateInput.value && startDateInput.value > endDateInput.value) {
+    filterStatus.textContent = 'Start Date cannot be later than End Date.';
+    return;
+  }
+  try {
+    await loadDashboard();
+  } catch (err) {
+    filterStatus.textContent = 'Unable to load reports. Please try again.';
+  }
+});
+
+resetFilterBtn.addEventListener('click', async () => {
   startDateInput.value = '';
   endDateInput.value = '';
-  loadDashboard();
+  updateDateRangeConstraints();
+  filterStatus.textContent = '';
+  try {
+    await loadDashboard();
+  } catch (err) {
+    filterStatus.textContent = 'Unable to load reports. Please try again.';
+  }
 });
 
 // Initialize
 setTodayDefault();
-loadDashboard();
+updateDateRangeConstraints();
+loadDashboard().catch(() => {
+  filterStatus.textContent = 'Unable to load dashboard data. Please refresh the page.';
+});
